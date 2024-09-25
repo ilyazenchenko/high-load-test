@@ -3,7 +3,6 @@ package ru.zenchenko.nbki_test;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -33,6 +32,10 @@ class NbkiTestApplicationTests {
 	@Test
 	@Timeout(value = 90, unit = TimeUnit.SECONDS)
 	public void testAdd100kRecords() {
+		System.out.println("начинаем тест для добавления 100 000 записей");
+
+		long startTime = System.nanoTime();
+
 		// с помощью POST-запросов вставляем 100000 записей
 		IntStream.range(0, INSERT_TEST_RECORDS).forEach(i -> webTestClient.post()
 				.uri("/users")
@@ -50,6 +53,11 @@ class NbkiTestApplicationTests {
 				.getResponseBody();
 
 		assertThat(countResponse).isEqualTo(INSERT_TEST_RECORDS);
+
+		System.out.println("тест для добавления 100 000 записей завершен успешно");
+
+		double totalTestTime = (System.nanoTime() - startTime) / 1_000_000_000.0;
+		System.out.println("общее время в секундах: " + totalTestTime);
 	}
 
 	//--------------------------------------------------------------------
@@ -69,14 +77,24 @@ class NbkiTestApplicationTests {
 	@Test
 	@Timeout(value = 60, unit = TimeUnit.SECONDS)
 	public void testSelect1MRecordsWith100Connections() throws InterruptedException, ExecutionException {
+		System.out.println("начинаем тест для выборки 1млн записей в 100 потоках (по 10000 на каждый)");
+
 		// начальное заполнение бд
 		insertInitialRows();
+
+		//засекаем время после заполнения бд
+		long startTime = System.nanoTime();
 
 		// выполнение запросов с 100 параллельными соединениями
 		List<Long> eachConnectionTimes = sendRequestsWith100Connections();
 
 		// вывод статистики
-		printStatistics(eachConnectionTimes);
+
+		System.out.println("тест для выборки 1млн записей в 100 потоках завершен");
+		double totalTestTime = (System.nanoTime() - startTime) / 1_000_000_000.0;
+
+		System.out.println("общее время в секундах: " + totalTestTime);
+		printStatistics(eachConnectionTimes, totalTestTime);
 	}
 
 	// метод для вставки начальных записей в базу данных перед тестом
@@ -134,7 +152,7 @@ class NbkiTestApplicationTests {
 		return times;
 	}
 
-	private static void printStatistics(List<Long> times) {
+	private static void printStatistics(List<Long> times, double totalTestTime) {
 		//  общее время выполнения всех запросов
 		long totalTime = times.stream().mapToLong(Long::longValue).sum();
 
@@ -150,13 +168,11 @@ class NbkiTestApplicationTests {
 		long p99 = times.get((int) (times.size() * 0.99));
 
 		// переводим в секунды
-		double totalTimeInSeconds = totalTime / 1_000_000_000.0;
 		double averageTimeInSeconds = averageTime / 1_000_000_000.0;
 		double medianTimeInSeconds = medianTime / 1_000_000_000.0;
 		double p95InSeconds = p95 / 1_000_000_000.0;
 		double p99InSeconds = p99 / 1_000_000_000.0;
 
-		System.out.println("Total time (sec): " + totalTimeInSeconds);
 		System.out.println("Average time (sec): " + averageTimeInSeconds);
 		System.out.println("Median time (sec): " + medianTimeInSeconds);
 		System.out.println("95th percentile (sec): " + p95InSeconds);
