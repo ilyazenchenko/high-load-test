@@ -58,7 +58,7 @@ public class Select1MRecordsWith100ConsTest {
         System.out.println("тест для выборки 1млн записей в 100 потоках завершен");
         double totalTestTime = (System.nanoTime() - startTime) / 1_000_000_000.0;
 
-        System.out.println("Общее время запросов в секундах: " + totalTestTime);
+        System.out.println("Общее время теста в секундах: " + totalTestTime);
         printStatistics(eachConnectionTimes);
     }
 
