@@ -53,7 +53,7 @@ public class UserController {
         if (startingId == null || range == null) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
-        List<User> users = userRepository.findAllByIdBetween(startingId, startingId + range);
+        List<User> users = userRepository.findAllByIdBetween(startingId, startingId + range - 1);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 

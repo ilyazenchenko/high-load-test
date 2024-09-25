@@ -33,7 +33,7 @@ class NbkiTestApplicationTests {
 	@Timeout(value = 90, unit = TimeUnit.SECONDS)
 	public void testAdd100kRecords() {
 		System.out.println("-------------------------------------------------------------------------");
-		System.out.println("начинаем тест для добавления 100 000 записей");
+		System.out.println("Начинаем тест для добавления 100 000 записей");
 
 		long startTime = System.nanoTime();
 
@@ -100,18 +100,26 @@ class NbkiTestApplicationTests {
 		System.out.println("тест для выборки 1млн записей в 100 потоках завершен");
 		double totalTestTime = (System.nanoTime() - startTime) / 1_000_000_000.0;
 
-		System.out.println("Общее время в секундах: " + totalTestTime);
+		System.out.println("Общее время запросов в секундах: " + totalTestTime);
 		printStatistics(eachConnectionTimes, totalTestTime);
 	}
 
 	// метод для вставки начальных записей в базу данных перед тестом
 	private void insertInitialRows() {
+		long startTime = System.nanoTime();
+		System.out.println("начинаем вставку " + SELECT_TEST_RECORDS_TO_INSERT +" записей");
+
 		List<User> users = new ArrayList<>();
 		for (int i = 1; i < SELECT_TEST_RECORDS_TO_INSERT; i++) {
 			users.add(new User((long)i, "Name " + i));
 		}
 		// Сохранение всех записей в базу данных.
 		userRepository.saveAll(users);
+
+		double totalInsertTime = (System.nanoTime() - startTime) / 1_000_000_000.0;
+
+		System.out.println("Вставка записей завершена. Время вставки в секундах: " + totalInsertTime);
+
 	}
 
 	// метод для выполнения параллельных запросов с использованием 100 потоков (соединений)
@@ -143,7 +151,10 @@ class NbkiTestApplicationTests {
 						.returnResult()
 						.getResponseBody();
 
-				System.out.println("Отправлен запрос из потока "+ Thread.currentThread().getName() + "; начальный id=" + randomID);
+                assertThat(usersResult).isNotNull();
+                assertThat(usersResult.size()).isEqualTo(RECORDS_RANGE_TO_SELECT);
+
+				System.out.println("Отправлен запрос из потока "+ Thread.currentThread().getName() + "; начальный id=" + randomID + "; выбрать записей: " + RECORDS_RANGE_TO_SELECT);
 
 				totalQueryTime += (System.nanoTime() - startTime);
 				return totalQueryTime;
@@ -180,10 +191,10 @@ class NbkiTestApplicationTests {
 		double p95InSeconds = p95 / 1_000_000_000.0;
 		double p99InSeconds = p99 / 1_000_000_000.0;
 
-		System.out.println("Average time (sec): " + averageTimeInSeconds);
-		System.out.println("Median time (sec): " + medianTimeInSeconds);
-		System.out.println("95th percentile (sec): " + p95InSeconds);
-		System.out.println("99th percentile (sec): " + p99InSeconds);
+		System.out.println("Среднее время (sec): " + averageTimeInSeconds);
+		System.out.println("Медианное время (sec): " + medianTimeInSeconds);
+		System.out.println("95 перцентиль (sec): " + p95InSeconds);
+		System.out.println("99 перцентиль (sec): " + p99InSeconds);
 	}
 
 }
