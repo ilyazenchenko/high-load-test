@@ -46,18 +46,6 @@ public class UserController {
         return userRepository.count();
     }
 
-    //получить юзеров с id между start и start + range
-    @GetMapping("/range")
-    public ResponseEntity<List<User>> getRangeUsers(@RequestParam("start") String start, @RequestParam("range") String rangeStr){
-        Long startingId = tryParseLong(start);
-        Long range = tryParseLong(rangeStr);
-        if (startingId == null || range == null) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
-        List<User> users = userRepository.findAllByIdBetween(startingId, startingId + range - 1);
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
     //создать пользователя
     @PostMapping
     public ResponseEntity<HttpStatus> createUser(@RequestBody User user) {
