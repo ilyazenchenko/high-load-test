@@ -154,7 +154,7 @@ class NbkiTestApplicationTests {
                 assertThat(usersResult).isNotNull();
                 assertThat(usersResult.size()).isEqualTo(RECORDS_RANGE_TO_SELECT);
 
-				System.out.println("Отправлен запрос из потока "+ Thread.currentThread().getName() + "; начальный id=" + randomID + "; выбрать записей: " + RECORDS_RANGE_TO_SELECT);
+				System.out.println("Отправлен запрос из потока "+ Thread.currentThread().getName() + "; id первой записи=" + randomID + "; выбрать записей: " + RECORDS_RANGE_TO_SELECT);
 
 				totalQueryTime += (System.nanoTime() - startTime);
 				return totalQueryTime;
