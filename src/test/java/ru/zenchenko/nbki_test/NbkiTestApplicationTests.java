@@ -32,16 +32,20 @@ class NbkiTestApplicationTests {
 	@Test
 	@Timeout(value = 90, unit = TimeUnit.SECONDS)
 	public void testAdd100kRecords() {
+		System.out.println("-------------------------------------------------------------------------");
 		System.out.println("начинаем тест для добавления 100 000 записей");
 
 		long startTime = System.nanoTime();
 
 		// с помощью POST-запросов вставляем 100000 записей
-		IntStream.range(0, INSERT_TEST_RECORDS).forEach(i -> webTestClient.post()
+		IntStream.range(0, INSERT_TEST_RECORDS).forEach(i -> {
+			webTestClient.post()
 				.uri("/users")
 				.bodyValue(new User("Name " + i))
 				.exchange()
-				.expectStatus().isCreated());
+				.expectStatus().isCreated();
+			if (i % 10000 == 0) System.out.println("отправлено запросов и добавлено записей: " + i);
+		});
 
 		// считаем итоговое кол-во строк
 		Long countResponse = webTestClient.get()
@@ -54,6 +58,7 @@ class NbkiTestApplicationTests {
 
 		assertThat(countResponse).isEqualTo(INSERT_TEST_RECORDS);
 
+		System.out.println("-------------------------------------------------------------------------");
 		System.out.println("тест для добавления 100 000 записей завершен успешно");
 
 		double totalTestTime = (System.nanoTime() - startTime) / 1_000_000_000.0;
@@ -77,6 +82,7 @@ class NbkiTestApplicationTests {
 	@Test
 	@Timeout(value = 60, unit = TimeUnit.SECONDS)
 	public void testSelect1MRecordsWith100Connections() throws InterruptedException, ExecutionException {
+		System.out.println("-------------------------------------------------------------------------");
 		System.out.println("начинаем тест для выборки 1млн записей в 100 потоках (по 10000 на каждый)");
 
 		// начальное заполнение бд
@@ -90,10 +96,11 @@ class NbkiTestApplicationTests {
 
 		// вывод статистики
 
+		System.out.println("-------------------------------------------------------------------------");
 		System.out.println("тест для выборки 1млн записей в 100 потоках завершен");
 		double totalTestTime = (System.nanoTime() - startTime) / 1_000_000_000.0;
 
-		System.out.println("общее время в секундах: " + totalTestTime);
+		System.out.println("Общее время в секундах: " + totalTestTime);
 		printStatistics(eachConnectionTimes, totalTestTime);
 	}
 
