@@ -1,6 +1,6 @@
-# Установка, тесты и запуск
+# Клонирование, тесты и запуск
 
-## Установка
+## Клонировать
 ``git clone https://github.com/ilyazenchenko/high-load-test``
 
 ## Тесты 
